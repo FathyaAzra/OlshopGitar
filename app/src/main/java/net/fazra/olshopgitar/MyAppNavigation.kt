@@ -5,7 +5,9 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import net.fazra.olshopgitar.pages.HomePage
 import net.fazra.olshopgitar.pages.LoginPage
+import net.fazra.olshopgitar.pages.SignupPage
 
 @Composable
 fun MyAppNavigation(modifier: Modifier=Modifier, authViewModel: AuthViewModel){
@@ -16,10 +18,10 @@ fun MyAppNavigation(modifier: Modifier=Modifier, authViewModel: AuthViewModel){
             LoginPage(modifier, navController, authViewModel)
         }
         composable("signup") {
-            LoginPage(modifier, navController, authViewModel)
+            SignupPage(modifier, navController, authViewModel)
         }
         composable("home") {
-            LoginPage(modifier, navController, authViewModel)
+            HomePage(modifier, navController, authViewModel)
         }
     })
 }
