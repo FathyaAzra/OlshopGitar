@@ -5,9 +5,10 @@ Tugas Akhir ITCAMP Mobile Development :
 Nama : Fathya Azra Nazmira
 
 Fitur :
-- Autentikasi Pengguna (Login, SignUp) dengan Firebase
-- List Produk Gitar (data awal dipersiapkan dalam project kali ini, tidak bisa ditambah)
+- Autentikasi Pengguna (Login, SignUp, Logout) dengan Firebase
+- List Produk Gitar
 - Detail produk
 - Keranjang
 
-Database : Firebase
+Database, Auth : Firebase
+UI : Composable
