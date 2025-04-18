@@ -8,7 +8,6 @@ Fitur :
 - Autentikasi Pengguna (Login, SignUp) dengan Firebase
 - List Produk Gitar (data awal dipersiapkan dalam project kali ini, tidak bisa ditambah)
 - Detail produk
-- Profil (mengisi alamat)
 - Keranjang
 
 Database : Firebase
