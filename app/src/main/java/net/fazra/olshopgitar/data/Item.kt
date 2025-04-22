@@ -1,6 +1,7 @@
 package net.fazra.olshopgitar.data
 
 data class Item(
+    val id: Int,
     val name: String,
     val category: String,
     val price : Int,
