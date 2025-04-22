@@ -18,7 +18,7 @@ import net.fazra.olshopgitar.data.Item
 
 @Composable
 fun ItemCard(item: Item, modifier: Modifier = Modifier, onClick: (() -> Unit)? = null) {
-    val isOutOfStock = item.itemleft == 0
+    val isOutOfStock = item.stock == 0
     val colorScheme = MaterialTheme.colorScheme
 
     val cardModifier = if (onClick != null && !isOutOfStock) {
@@ -33,23 +33,18 @@ fun ItemCard(item: Item, modifier: Modifier = Modifier, onClick: (() -> Unit)? =
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         colors = CardDefaults.cardColors(
             containerColor = if (isOutOfStock) {
-                // Lighter shade of surface in both dark and light themes
                 if (isSystemInDarkTheme()) {
-                    // Dark theme: lighter surface variant for out of stock
                     colorScheme.surfaceVariant.copy(alpha = 0.4f)
                 } else {
-                    // Light theme: a more subtle background color
                     colorScheme.surfaceVariant
                 }
             } else {
-                // For in-stock items, use the regular surface or variant depending on the theme
                 colorScheme.surface
             }
         )
     ) {
         Column(modifier = Modifier
-            .fillMaxWidth()
-            .padding(bottom = 3.dp)) {
+            .fillMaxWidth()) {
 
             Box(modifier = Modifier.fillMaxWidth()) {
                 Image(

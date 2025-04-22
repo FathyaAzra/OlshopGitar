@@ -25,7 +25,7 @@ fun ItemGrid(
                 modifier = Modifier
                     .fillMaxWidth()
                     .aspectRatio(0.75f),
-                onClick = if (item.itemleft > 0) {
+                onClick = if (item.stock > 0) {
                     { onItemClick(item) }
                 } else null
             )

@@ -6,6 +6,6 @@ data class Item(
     val category: String,
     val price : Int,
     val description: String,
-    val itemleft : Int,
+    val stock : Int,
     val photoResId: Int,
 )
