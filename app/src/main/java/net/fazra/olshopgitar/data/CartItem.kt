@@ -5,6 +5,5 @@ data class CartItem(
     var name: String = "",
     var price: Int = 0,
     var quantity: Int = 0,
-    var photoUrl: String = "" // Add the photoUrl property here
+    var photoUrl: String = ""
 )
-

@@ -1,6 +1,5 @@
 package net.fazra.olshopgitar.pages.components
 
-import AutoScrollingText
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
@@ -19,7 +18,6 @@ import net.fazra.olshopgitar.data.Item
 fun ItemCard(item: Item, modifier: Modifier = Modifier, onClick: (() -> Unit)? = null) {
     val isOutOfStock = item.stock == 0
     val colorScheme = MaterialTheme.colorScheme
-
     val cardModifier = if (onClick != null && !isOutOfStock) {
         modifier.clickable { onClick() }
     } else {

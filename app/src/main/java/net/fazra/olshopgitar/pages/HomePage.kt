@@ -66,7 +66,6 @@ fun HomePage(
     val filteredItems = allItems.filter {
         selectedCategory == "All" || it.category == selectedCategory
     }
-
     val colorScheme = MaterialTheme.colorScheme
 
     ModalNavigationDrawer(

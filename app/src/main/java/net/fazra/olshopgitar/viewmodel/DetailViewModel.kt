@@ -1,15 +1,12 @@
 package net.fazra.olshopgitar.viewmodel
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.google.firebase.database.FirebaseDatabase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
 import net.fazra.olshopgitar.data.Item
 
 class DetailViewModel : ViewModel() {
-
     private val _item = MutableStateFlow<Item?>(null)
     val item: StateFlow<Item?> = _item
 

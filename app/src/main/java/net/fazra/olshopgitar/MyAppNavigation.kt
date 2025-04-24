@@ -14,11 +14,13 @@ import net.fazra.olshopgitar.pages.HistoryPage
 import net.fazra.olshopgitar.pages.components.TempAdd
 import net.fazra.olshopgitar.viewmodel.AuthViewModel
 import net.fazra.olshopgitar.viewmodel.CartViewModel
+import net.fazra.olshopgitar.viewmodel.OrderViewModel
 
 @Composable
 fun MyAppNavigation(modifier: Modifier=Modifier, authViewModel: AuthViewModel){
     val navController = rememberNavController()
     val cartViewModel = CartViewModel()
+    val orderViewModel = OrderViewModel()
 
     NavHost(navController = navController, startDestination = "login", builder = {
         composable("login") {
@@ -37,13 +39,14 @@ fun MyAppNavigation(modifier: Modifier=Modifier, authViewModel: AuthViewModel){
         composable("cart") {
             CartPage(
                 modifier = Modifier,
-                navController = navController,
-                cartViewModel = cartViewModel,
-                authViewModel = authViewModel
+                navController,
+                cartViewModel,
+                authViewModel,
+                orderViewModel
             )
         }
         composable("history"){
-            HistoryPage(modifier, navController, authViewModel)
+            HistoryPage(modifier, navController, authViewModel, orderViewModel)
         }
         composable("stock"){
             TempAdd(modifier, navController)

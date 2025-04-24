@@ -42,7 +42,6 @@ fun CartProductCard(cartItem: CartItem, modifier: Modifier = Modifier, onClick: 
         )
     ) {
         Row(modifier = Modifier.fillMaxWidth()) {
-            // Image Section
             Box(
                 modifier = Modifier
                     .fillMaxHeight()
@@ -78,7 +77,7 @@ fun CartProductCard(cartItem: CartItem, modifier: Modifier = Modifier, onClick: 
                 }
             }
 
-            // Product Information Section
+            //TODO: Hapus Jenis Item dari Cart
             Column(
                 modifier = Modifier
                     .fillMaxHeight()
@@ -86,7 +85,6 @@ fun CartProductCard(cartItem: CartItem, modifier: Modifier = Modifier, onClick: 
                     .padding(8.dp),
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
-                // Product Name
                 Text(
                     text = cartItem.name,
                     style = MaterialTheme.typography.titleSmall,
@@ -94,7 +92,6 @@ fun CartProductCard(cartItem: CartItem, modifier: Modifier = Modifier, onClick: 
                     modifier = Modifier.fillMaxWidth()
                 )
 
-                // Product Price
                 Text(
                     text = "Rp ${cartItem.price}",
                     style = MaterialTheme.typography.bodyMedium,
@@ -102,7 +99,6 @@ fun CartProductCard(cartItem: CartItem, modifier: Modifier = Modifier, onClick: 
                     modifier = Modifier.fillMaxWidth()
                 )
 
-                // Quantity Section
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween,

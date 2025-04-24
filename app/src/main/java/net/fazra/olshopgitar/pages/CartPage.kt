@@ -17,44 +17,55 @@ import net.fazra.olshopgitar.viewmodel.AuthState
 import net.fazra.olshopgitar.viewmodel.AuthViewModel
 import net.fazra.olshopgitar.viewmodel.CartViewModel
 import net.fazra.olshopgitar.pages.components.CartProductCard
+import net.fazra.olshopgitar.viewmodel.OrderViewModel
+import net.fazra.olshopgitar.data.Order
+import net.fazra.olshopgitar.data.OrderItem
+import androidx.compose.foundation.layout.systemBarsPadding
 
 @Composable
 fun CartPage(
     modifier: Modifier = Modifier,
     navController: NavController,
     cartViewModel: CartViewModel,
-    authViewModel: AuthViewModel
+    authViewModel: AuthViewModel,
+    orderViewModel: OrderViewModel
 ) {
-    // Use observeAsState for LiveData to get the cart items
-    val cartItems by cartViewModel.cartItems.observeAsState(initial = emptyList())
 
-    // Observe authentication state
+    val cartItems by cartViewModel.cartItems.observeAsState(emptyMap())
     val currentUser by authViewModel.authState.observeAsState()
-
     val isAuthenticated = currentUser is AuthState.Authenticated
     val userId = (currentUser as? AuthState.Authenticated)?.userId.orEmpty()
 
-    var isLoading by remember { mutableStateOf(true) }
-
-    // Trigger loading cart items when the user is authenticated
+    // Load cart items
     LaunchedEffect(userId) {
         if (isAuthenticated && userId.isNotEmpty()) {
             cartViewModel.loadCartFromFirebase(userId)
-            isLoading = false
-        } else {
-            isLoading = false
         }
     }
 
-    // Show loading spinner while data is being loaded
-    if (isLoading) {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator()
+    // Check if data is loading
+    if (cartItems.isEmpty()) {
+        // Display loading or empty cart state
+        Box(modifier = Modifier.fillMaxSize().padding(16.dp), contentAlignment = Alignment.Center) {
+            if (cartItems.isEmpty()) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(text = "Your cart is empty", style = MaterialTheme.typography.bodyLarge)
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Button(onClick = { navController.navigate("home") }) {
+                        Text("Browse Products")
+                    }
+                }
+            } else {
+                CircularProgressIndicator()
+            }
         }
     } else {
-        // Main content for the cart page
-        Column(modifier = modifier.padding(10.dp)) {
-            // Header with back button and title
+        Column(
+            modifier = modifier
+                .fillMaxSize()
+                .padding(16.dp)
+                .systemBarsPadding()
+        ) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -75,48 +86,42 @@ fun CartPage(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Cart content or empty state
-            if (cartItems.isEmpty()) {
-                Text(
-                    text = "Keranjang kosong",
-                    style = MaterialTheme.typography.bodyMedium
-                )
-            } else {
-                // Display cart items
-                LazyColumn(
-                    contentPadding = PaddingValues(vertical = 8.dp)
-                ) {
-                    items(cartItems) { item ->
-                        CartProductCard(cartItem = item)
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // Proceed to checkout button
-                Button(
-                    onClick = { navController.navigate("shopping_history") },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(text = "Proceed to Checkout")
+            LazyColumn(contentPadding = PaddingValues(vertical = 8.dp)) {
+                items(cartItems.values.toList()) { item ->
+                    CartProductCard(cartItem = item)
                 }
             }
-        }
-    }
 
-    // Show message to login if the user is not authenticated
-    if (!isAuthenticated) {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(
-                    text = "You need to login to view your cart.",
-                    style = MaterialTheme.typography.bodyLarge
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                Button(onClick = { navController.navigate("login") }) {
-                    Text(text = "Login")
-                }
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Button(
+                onClick = {
+                    if (userId.isNotEmpty()) {
+                        val orderItemsMap = cartItems.entries.associate { entry ->
+                            entry.key to OrderItem(
+                                itemId = entry.value.itemId,
+                                name = entry.value.name,
+                                price = entry.value.price,
+                                quantity = entry.value.quantity
+                            )
+                        }
+                        val totalPrice = cartItems.values.sumOf { it.price * it.quantity }
+                        val order = Order(
+                            orderId = "",
+                            items = orderItemsMap,
+                            totalPrice = totalPrice,
+                            orderDate = System.currentTimeMillis().toString()
+                        )
+                        orderViewModel.placeOrder(order)
+                        navController.navigate("history")
+                    }
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(text = "Proceed to Checkout")
             }
         }
     }
 }
+
+

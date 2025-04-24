@@ -4,19 +4,15 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.database.FirebaseDatabase
 import net.fazra.olshopgitar.data.User
 import net.fazra.olshopgitar.data.Cart
-import net.fazra.olshopgitar.data.CartItem
-import net.fazra.olshopgitar.data.Order
 
 class AuthViewModel : ViewModel() {
-
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
     private val database = FirebaseDatabase.getInstance().reference
     private val userRef = database.child("users")
-
     private val _authState = MutableLiveData<AuthState>()
     val authState: LiveData<AuthState> = _authState
 
@@ -28,7 +24,6 @@ class AuthViewModel : ViewModel() {
             } ?: AuthState.Unauthenticated
         }
     }
-
 
     fun login(email: String, password: String) {
         if (email.isEmpty() || password.isEmpty()) {
@@ -89,16 +84,14 @@ class AuthViewModel : ViewModel() {
             email = email,
             cart = Cart(
                 cartId = userId,
-                userId = userId,
-                items = emptyList()
+                items = emptyMap()
             ),
-            orderHistory = listOf()
+            orderHistory = emptyMap()
         )
 
         userRef.child(userId).setValue(newUser).addOnCompleteListener { task ->
             if (task.isSuccessful) {
                 _authState.value = AuthState.Authenticated(user.uid)
-
             } else {
                 _authState.value = AuthState.Error(task.exception?.message ?: "Failed to save user data")
             }
@@ -110,35 +103,6 @@ class AuthViewModel : ViewModel() {
         _authState.value = AuthState.Unauthenticated
     }
 
-    fun getUserData(userId: String, onResult: (User?) -> Unit) {
-        userRef.child(userId).get().addOnSuccessListener { snapshot ->
-            if (snapshot.exists()) {
-                val user = snapshot.getValue(User::class.java)
-                onResult(user)
-            } else {
-                onResult(null)
-            }
-        }
-    }
-
-    fun updateCart(userId: String, newCart: Cart) {
-        userRef.child(userId).child("cart").setValue(newCart)
-    }
-
-    fun addOrderToHistory(userId: String, order: Order) {
-        userRef.child(userId).child("orderHistory").push().setValue(order)
-    }
-
-    fun addItemToCart(userId: String, item: CartItem) {
-        getUserData(userId) { user ->
-            user?.let {
-                val updatedCart = it.cart.copy(
-                    items = it.cart.items + item
-                )
-                updateCart(userId, updatedCart)
-            }
-        }
-    }
 }
 
 sealed class AuthState {

@@ -7,5 +7,5 @@ data class Item(
     val price: Int = 0,
     val description: String = "",
     val stock: Int = 0,
-    val photoUrl: String = "" // dari Firebase Storage
+    val photoUrl: String = ""
 )

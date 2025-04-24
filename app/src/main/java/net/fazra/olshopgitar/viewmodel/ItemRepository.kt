@@ -8,7 +8,6 @@ import com.google.firebase.database.ValueEventListener
 import net.fazra.olshopgitar.data.Item
 
 class ItemRepository {
-
     private val database: FirebaseDatabase = FirebaseDatabase.getInstance()
     private val itemsRef: DatabaseReference = database.getReference("items")
 
@@ -25,11 +24,10 @@ class ItemRepository {
                         categories.add(category)
                     }
                 }
-                callback(categories)  // Return the list of categories
+                callback(categories)
             }
-
             override fun onCancelled(error: DatabaseError) {
-                callback(emptyList())  // Return an empty list on error
+                callback(emptyList())
             }
         })
     }

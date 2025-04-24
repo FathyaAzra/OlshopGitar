@@ -28,17 +28,9 @@ import androidx.compose.ui.platform.LocalContext
 
 @Composable
 fun SignupPage(modifier: Modifier = Modifier, navController: NavController, authViewModel: AuthViewModel){
-
-    var email by remember {
-        mutableStateOf("")
-    }
-
-    var password by remember {
-        mutableStateOf("")
-    }
-
+    var email by remember {mutableStateOf("")}
+    var password by remember {mutableStateOf("")}
     val context = LocalContext.current
-
     val authState = authViewModel.authState.observeAsState()
     LaunchedEffect(authState.value) {
         when (val state = authState.value) {
