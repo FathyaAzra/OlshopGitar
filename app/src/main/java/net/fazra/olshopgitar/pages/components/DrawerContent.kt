@@ -17,7 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavController
-import net.fazra.olshopgitar.AuthViewModel
+import net.fazra.olshopgitar.viewmodel.AuthViewModel
 
 @Composable
 fun DrawerContent(
@@ -37,13 +37,13 @@ fun DrawerContent(
         DrawerItem(
             icon = Icons.Default.ShoppingCart,
             label = "Keranjang",
-            onClick = { /* navController.navigate("cart") */ }
+            onClick = { navController.navigate("cart") }
         )
 
         DrawerItem(
             icon = Icons.Default.Refresh,
             label = "Riwayat Belanja",
-            onClick = { /* navController.navigate("history") */ }
+            onClick = { navController.navigate("history") }
         )
 
         DrawerItem(
@@ -56,6 +56,12 @@ fun DrawerContent(
                     popUpTo("home") { inclusive = true }
                 }
             }
+        )
+
+        DrawerItem(
+            icon = Icons.Default.ShoppingCart,
+            label = "Stock Change (Khusus Admin/testing)",
+            onClick = { navController.navigate("stock") }
         )
     }
 }

@@ -2,7 +2,9 @@ package net.fazra.olshopgitar.pages
 
 import android.widget.Toast
 import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -13,28 +15,44 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import net.fazra.olshopgitar.*
 import net.fazra.olshopgitar.data.Item
 import net.fazra.olshopgitar.pages.components.ItemGrid
-import net.fazra.olshopgitar.R
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.ui.platform.LocalConfiguration
 import kotlinx.coroutines.launch
 import net.fazra.olshopgitar.pages.components.DrawerContent
+import net.fazra.olshopgitar.viewmodel.AuthState
+import net.fazra.olshopgitar.viewmodel.AuthViewModel
+import net.fazra.olshopgitar.viewmodel.ItemRepository
 
 @Composable
 fun HomePage(
     modifier: Modifier = Modifier,
     navController: NavController,
-    authViewModel: AuthViewModel
+    authViewModel: AuthViewModel,
+    itemRepository: ItemRepository = ItemRepository()
 ) {
     val context = LocalContext.current
     val authState = authViewModel.authState.observeAsState()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val coroutineScope = rememberCoroutineScope()
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
-    val halfScreenWidth = screenWidth *3/4
+    val halfScreenWidth = screenWidth * 3 / 4
+    var allItems by remember { mutableStateOf<List<Item>>(emptyList()) }
+    var categories by remember { mutableStateOf<List<String>>(listOf()) }
+
+    LaunchedEffect(Unit) {
+        itemRepository.fetchCategories { fetchedCategories ->
+            categories = fetchedCategories
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        itemRepository.listenForItemsUpdates { items ->
+            allItems = items
+        }
+    }
 
     LaunchedEffect(authState.value) {
         when (val state = authState.value) {
@@ -42,19 +60,6 @@ fun HomePage(
             is AuthState.Error -> Toast.makeText(context, state.message, Toast.LENGTH_SHORT).show()
             else -> Unit
         }
-    }
-
-    val allItems = remember {
-        listOf(
-            Item(1, "Gitar Akustik Bernama Bento", "Gitar", 1000000, "Gitar Akustik", 3, R.drawable.guitar1),
-            Item(2, "Gitar Elektrik", "Gitar", 500000, "Gitar Elektrik", 2, R.drawable.guitar1),
-            Item(3, "Efek Gitar", "Effect", 300000, "Efek suara", 5, R.drawable.guitar1),
-            Item(4, "Amplifier", "Amp", 700000, "Ampli kecil", 1, R.drawable.guitar1),
-            Item(6, "Gitar Akustik", "Gitar", 1000000, "Gitar Akustik", 0, R.drawable.guitar1),
-            Item(7, "Gitar Elektrik", "Gitar", 500000, "Gitar Elektrik", 2, R.drawable.guitar1),
-            Item(8, "Efek Gitar", "Effect", 300000, "Efek suara", 0, R.drawable.guitar1),
-            Item(9, "Amplifier", "Amp", 700000, "Ampli kecil", 1, R.drawable.guitar1)
-        )
     }
 
     var selectedCategory by remember { mutableStateOf("All") }
@@ -94,9 +99,7 @@ fun HomePage(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 IconButton(onClick = {
-                    coroutineScope.launch {
-                        drawerState.open()
-                    }
+                    coroutineScope.launch { drawerState.open() }
                 }) {
                     Icon(Icons.Default.Menu, contentDescription = "Menu")
                 }
@@ -111,25 +114,21 @@ fun HomePage(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            val categories = listOf("All", "Gitar", "Effect", "Amp")
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .horizontalScroll(rememberScrollState()), // Make it scrollable horizontally
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                categories.forEach { category ->
+                val allCategories = listOf("All") + categories
+                allCategories.forEach { category ->
                     val isSelected = selectedCategory == category
                     Button(
                         onClick = { selectedCategory = category },
                         shape = RoundedCornerShape(4.dp),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = if (isSelected)
-                                colorScheme.primary
-                            else
-                                colorScheme.surfaceVariant,
-                            contentColor = if (isSelected)
-                                colorScheme.onPrimary
-                            else
-                                colorScheme.onSurfaceVariant
+                            containerColor = if (isSelected) colorScheme.primary else colorScheme.surfaceVariant,
+                            contentColor = if (isSelected) colorScheme.onPrimary else colorScheme.onSurfaceVariant
                         )
                     ) {
                         Text(category, fontSize = 15.sp, style = MaterialTheme.typography.labelMedium)
@@ -139,14 +138,16 @@ fun HomePage(
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            // Display Items in a Grid
             ItemGrid(items = filteredItems) { item ->
                 if (item.stock > 0) {
-                    Toast.makeText(context, "Klik: ${item.name}", Toast.LENGTH_SHORT).show()
+                    navController.navigate("detail/${item.id}")
                 } else {
                     Toast.makeText(context, "Stok habis!", Toast.LENGTH_SHORT).show()
                 }
             }
         }
     }
-
 }
+
+

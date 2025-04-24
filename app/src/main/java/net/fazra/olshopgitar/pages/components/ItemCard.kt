@@ -1,7 +1,6 @@
 package net.fazra.olshopgitar.pages.components
 
 import AutoScrollingText
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
@@ -12,8 +11,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import net.fazra.olshopgitar.data.Item
 
 @Composable
@@ -47,8 +46,8 @@ fun ItemCard(item: Item, modifier: Modifier = Modifier, onClick: (() -> Unit)? =
             .fillMaxWidth()) {
 
             Box(modifier = Modifier.fillMaxWidth()) {
-                Image(
-                    painter = painterResource(id = item.photoResId),
+                AsyncImage(
+                    model = item.photoUrl,
                     contentDescription = item.name,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
