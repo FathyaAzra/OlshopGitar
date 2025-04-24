@@ -5,6 +5,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import net.fazra.olshopgitar.pages.CartPage
 import net.fazra.olshopgitar.pages.HomePage
 import net.fazra.olshopgitar.pages.LoginPage
 import net.fazra.olshopgitar.pages.SignupPage
@@ -12,10 +13,12 @@ import net.fazra.olshopgitar.pages.DetailPage
 import net.fazra.olshopgitar.pages.HistoryPage
 import net.fazra.olshopgitar.pages.components.TempAdd
 import net.fazra.olshopgitar.viewmodel.AuthViewModel
+import net.fazra.olshopgitar.viewmodel.CartViewModel
 
 @Composable
 fun MyAppNavigation(modifier: Modifier=Modifier, authViewModel: AuthViewModel){
     val navController = rememberNavController()
+    val cartViewModel = CartViewModel()
 
     NavHost(navController = navController, startDestination = "login", builder = {
         composable("login") {
@@ -31,15 +34,19 @@ fun MyAppNavigation(modifier: Modifier=Modifier, authViewModel: AuthViewModel){
             val itemId = backStackEntry.arguments?.getString("itemId")?.toIntOrNull() ?: 0
             DetailPage(navController = navController, authViewModel = authViewModel, itemId = itemId)
         }
-//        composable("cart"){
-//            CartPage(modifier, navController, authViewModel)
-//            CartPage(modifier, navController, authViewModel)
-//        }
+        composable("cart") {
+            CartPage(
+                modifier = Modifier,
+                navController = navController,
+                cartViewModel = cartViewModel,
+                authViewModel = authViewModel
+            )
+        }
         composable("history"){
             HistoryPage(modifier, navController, authViewModel)
         }
         composable("stock"){
-            TempAdd(modifier, navController, authViewModel)
+            TempAdd(modifier, navController)
         }
     })
 }

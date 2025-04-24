@@ -8,30 +8,30 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.auth.FirebaseUser
 import net.fazra.olshopgitar.data.User
 import net.fazra.olshopgitar.data.Cart
+import net.fazra.olshopgitar.data.CartItem
 import net.fazra.olshopgitar.data.Order
 
 class AuthViewModel : ViewModel() {
 
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
     private val database = FirebaseDatabase.getInstance().reference
+    private val userRef = database.child("users")
 
     private val _authState = MutableLiveData<AuthState>()
     val authState: LiveData<AuthState> = _authState
 
     init {
-        checkAuthStatus()
-    }
-
-    fun checkAuthStatus(){
-        if(auth.currentUser == null){
-            _authState.value = AuthState.Unauthenticated
-        } else{
-            _authState.value = AuthState.Authenticated
+        auth.addAuthStateListener { firebaseAuth ->
+            val currentUser = firebaseAuth.currentUser
+            _authState.value = currentUser?.let {
+                AuthState.Authenticated(it.uid)
+            } ?: AuthState.Unauthenticated
         }
     }
 
-    fun login(email: String, password: String){
-        if(email.isEmpty() || password.isEmpty()){
+
+    fun login(email: String, password: String) {
+        if (email.isEmpty() || password.isEmpty()) {
             _authState.value = AuthState.Error("Email or password can't be empty")
             return
         }
@@ -39,20 +39,19 @@ class AuthViewModel : ViewModel() {
         _authState.value = AuthState.Loading
         auth.signInWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->
-                if(task.isSuccessful){
+                if (task.isSuccessful) {
                     val user = auth.currentUser
                     if (user != null) {
-                        // Check if user data exists in Firebase
                         checkIfUserExists(user)
                     }
-                } else{
+                } else {
                     _authState.value = AuthState.Error(task.exception?.message ?: "Something went wrong")
                 }
             }
     }
 
-    fun signup(email: String, password: String){
-        if(email.isEmpty() || password.isEmpty()){
+    fun signup(email: String, password: String) {
+        if (email.isEmpty() || password.isEmpty()) {
             _authState.value = AuthState.Error("Email or password can't be empty")
             return
         }
@@ -60,26 +59,23 @@ class AuthViewModel : ViewModel() {
         _authState.value = AuthState.Loading
         auth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->
-                if(task.isSuccessful){
+                if (task.isSuccessful) {
                     val user = auth.currentUser
                     if (user != null) {
-                        // Save user data after sign-up
                         saveUserData(user)
                     }
-                } else{
+                } else {
                     _authState.value = AuthState.Error(task.exception?.message ?: "Something went wrong")
                 }
             }
     }
 
     private fun checkIfUserExists(user: FirebaseUser) {
-        val userRef = database.child("users").child(user.uid)
-        userRef.get().addOnSuccessListener { snapshot ->
+        userRef.child(user.uid).get().addOnSuccessListener { snapshot ->
             if (!snapshot.exists()) {
-                // Save user data if it doesn't exist
                 saveUserData(user)
             } else {
-                _authState.value = AuthState.Authenticated
+                _authState.value = AuthState.Authenticated(user.uid)
             }
         }
     }
@@ -88,38 +84,34 @@ class AuthViewModel : ViewModel() {
         val userId = user.uid
         val email = user.email ?: "Unknown"
 
-        // Create User object
         val newUser = User(
             userId = userId,
             email = email,
             cart = Cart(
-                cartId = TODO(),
-                userId = TODO(),
-                items = TODO()
-            ), // Empty cart by default
-            orderHistory = listOf() // Empty order history by default
+                cartId = userId,
+                userId = userId,
+                items = emptyList()
+            ),
+            orderHistory = listOf()
         )
 
-        val userRef = database.child("users").child(userId)
-
-        // Save the user data to Firebase Realtime Database
-        userRef.setValue(newUser).addOnCompleteListener { task ->
+        userRef.child(userId).setValue(newUser).addOnCompleteListener { task ->
             if (task.isSuccessful) {
-                _authState.value = AuthState.Authenticated
+                _authState.value = AuthState.Authenticated(user.uid)
+
             } else {
                 _authState.value = AuthState.Error(task.exception?.message ?: "Failed to save user data")
             }
         }
     }
 
-    fun signout(){
+    fun signout() {
         auth.signOut()
         _authState.value = AuthState.Unauthenticated
     }
 
     fun getUserData(userId: String, onResult: (User?) -> Unit) {
-        val userRef = database.child("users").child(userId)
-        userRef.get().addOnSuccessListener { snapshot ->
+        userRef.child(userId).get().addOnSuccessListener { snapshot ->
             if (snapshot.exists()) {
                 val user = snapshot.getValue(User::class.java)
                 onResult(user)
@@ -129,22 +121,29 @@ class AuthViewModel : ViewModel() {
         }
     }
 
-    // Update user's cart
     fun updateCart(userId: String, newCart: Cart) {
-        val userRef = database.child("users").child(userId)
-        userRef.child("cart").setValue(newCart)
+        userRef.child(userId).child("cart").setValue(newCart)
     }
 
-    // Add completed order to order history
     fun addOrderToHistory(userId: String, order: Order) {
-        val userRef = database.child("users").child(userId).child("orderHistory")
-        userRef.push().setValue(order)
+        userRef.child(userId).child("orderHistory").push().setValue(order)
+    }
+
+    fun addItemToCart(userId: String, item: CartItem) {
+        getUserData(userId) { user ->
+            user?.let {
+                val updatedCart = it.cart.copy(
+                    items = it.cart.items + item
+                )
+                updateCart(userId, updatedCart)
+            }
+        }
     }
 }
 
-sealed class AuthState{
-    object Authenticated : AuthState()
+sealed class AuthState {
+    data class Authenticated(val userId: String) : AuthState()
     object Unauthenticated : AuthState()
     object Loading : AuthState()
-    data class Error(val message : String) : AuthState()
+    data class Error(val message: String) : AuthState()
 }

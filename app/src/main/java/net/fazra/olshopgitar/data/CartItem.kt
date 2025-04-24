@@ -1,8 +1,10 @@
 package net.fazra.olshopgitar.data
 
 data class CartItem(
-    val itemId: Int,
-    val name: String,
-    val price: Double,
-    val quantity: Int
+    var itemId: String = "",
+    var name: String = "",
+    var price: Int = 0,
+    var quantity: Int = 0,
+    var photoUrl: String = "" // Add the photoUrl property here
 )
+

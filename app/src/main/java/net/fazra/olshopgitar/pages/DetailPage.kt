@@ -4,11 +4,11 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -16,9 +16,8 @@ import net.fazra.olshopgitar.viewmodel.AuthViewModel
 import net.fazra.olshopgitar.viewmodel.CartViewModel
 import net.fazra.olshopgitar.viewmodel.DetailViewModel
 import coil.compose.AsyncImage
-import androidx.compose.ui.res.painterResource
-
-
+import net.fazra.olshopgitar.data.CartItem
+import net.fazra.olshopgitar.viewmodel.AuthState
 
 @Composable
 fun DetailPage(
@@ -29,48 +28,53 @@ fun DetailPage(
     detailViewModel: DetailViewModel = viewModel(),
     cartViewModel: CartViewModel = viewModel()
 ) {
-    // Collect state for the item and loading status from the view model
     val item by detailViewModel.item.collectAsState()
     val isLoading by detailViewModel.isLoading.collectAsState()
-    var quantity by remember { mutableStateOf(1) }
+    var quantity by remember { mutableIntStateOf(1) }
 
-    // Fetch the item details when the itemId changes
+    // Fetch item details when the itemId changes
     LaunchedEffect(itemId) {
         detailViewModel.fetchItemById(itemId)
     }
 
-    // Show loading spinner while fetching data
+    // Get the current authentication state and userId
+    val currentUser by authViewModel.authState.observeAsState()
+    val isAuthenticated = currentUser is AuthState.Authenticated
+    val userId = (currentUser as? AuthState.Authenticated)?.userId
+
     if (isLoading) {
         Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             CircularProgressIndicator()
         }
     } else if (item == null) {
-        // Show a message if the item is not found
         Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Text("Item tidak ditemukan")
         }
     } else {
-        AsyncImage(
-            model = item!!.photoUrl,
-            contentDescription = item!!.name,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier
-                .fillMaxWidth()
-                .aspectRatio(1f)
-                .clip(RoundedCornerShape(16.dp)),
-        )
-
         Column(modifier = modifier.padding(16.dp)) {
-            // Item name
+            AsyncImage(
+                model = item!!.photoUrl,
+                contentDescription = item!!.name,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(1f)
+                    .clip(RoundedCornerShape(16.dp)),
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
             Text(text = item!!.name, style = MaterialTheme.typography.headlineSmall)
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(text = "Rp ${item!!.price}", style = MaterialTheme.typography.titleMedium)
             Spacer(modifier = Modifier.height(4.dp))
 
-            // Item description
             Text(text = item!!.description, style = MaterialTheme.typography.bodyMedium)
             Spacer(modifier = Modifier.height(16.dp))
+
+            Text(text = "Stock : ${item!!.stock}", style = MaterialTheme.typography.bodyMedium)
+            Spacer(modifier = Modifier.height(4.dp))
 
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -91,8 +95,25 @@ fun DetailPage(
 
             Button(
                 onClick = {
-                    cartViewModel.addItemToCart(item!!, quantity)
-                    navController.navigate("home")
+                    if (isAuthenticated && userId != null) {
+                        // Create a CartItem instance with the selected quantity
+                        val cartItem = CartItem(
+                            itemId = item!!.id.toString(),
+                            name = item!!.name,
+                            price = item!!.price,
+                            quantity = quantity,
+                            photoUrl = item!!.photoUrl
+                        )
+
+                        // Add the item to the cart in CartViewModel
+                        cartViewModel.addItemToCart(userId, cartItem)
+
+                        // Navigate to the cart page
+                        navController.navigate("cart")
+                    } else {
+                        // Redirect to login page if not authenticated
+                        navController.navigate("login")
+                    }
                 },
                 enabled = item!!.stock > 0
             ) {
@@ -101,5 +122,4 @@ fun DetailPage(
         }
     }
 }
-
 

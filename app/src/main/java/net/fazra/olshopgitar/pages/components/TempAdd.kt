@@ -14,7 +14,6 @@ import androidx.navigation.NavController
 import com.google.firebase.database.FirebaseDatabase
 import kotlinx.coroutines.launch
 import net.fazra.olshopgitar.api.ImgurService
-import net.fazra.olshopgitar.viewmodel.AuthViewModel
 import net.fazra.olshopgitar.data.Item
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
@@ -24,7 +23,6 @@ import okhttp3.RequestBody.Companion.toRequestBody
 fun TempAdd(
     modifier: Modifier = Modifier,
     navController: NavController,
-    authViewModel: AuthViewModel
 ) {
     val context = LocalContext.current
     var name by remember { mutableStateOf("") }
@@ -70,9 +68,8 @@ fun TempAdd(
                             val requestFile = bytes.toRequestBody("image/*".toMediaTypeOrNull())
                             val body = MultipartBody.Part.createFormData("image", "upload.jpg", requestFile)
 
-                            // Use the Client ID in the Authorization header
                             val response = ImgurService.api.uploadImage(
-                                authHeader = ImgurService.getAuthHeader(),  // Here is the Client ID in the header
+                                authHeader = ImgurService.getAuthHeader(),
                                 image = body
                             )
 
