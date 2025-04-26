@@ -34,10 +34,7 @@ fun AutoScrollingText(itemName: String) {
             .padding(horizontal = 8.dp)
     ) {
         Text(
-            text = itemName,
-            style = MaterialTheme.typography.titleMedium.copy(
-                color = MaterialTheme.colorScheme.onSurface
-            )
+            text = itemName
         )
     }
 }

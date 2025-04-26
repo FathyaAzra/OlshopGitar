@@ -23,6 +23,9 @@ import net.fazra.olshopgitar.viewmodel.AuthViewModel
 import net.fazra.olshopgitar.viewmodel.CartViewModel
 import net.fazra.olshopgitar.viewmodel.DetailViewModel
 import net.fazra.olshopgitar.data.CartItem
+import android.widget.Toast
+import androidx.compose.ui.platform.LocalContext
+
 
 @Composable
 fun DetailPage(
@@ -33,6 +36,7 @@ fun DetailPage(
     detailViewModel: DetailViewModel = viewModel(),
     cartViewModel: CartViewModel = viewModel()
 ) {
+    val context = LocalContext.current
     val item by detailViewModel.item.collectAsState()
     val isLoading by detailViewModel.isLoading.collectAsState()
     var quantity by remember { mutableIntStateOf(1) }
@@ -133,7 +137,6 @@ fun DetailPage(
             Button(
                 onClick = {
                     if (isAuthenticated && userId != null) {
-                        // Create a CartItem instance with the selected quantity
                         val cartItem = CartItem(
                             itemId = item!!.id.toString(),
                             name = item!!.name,
@@ -142,13 +145,10 @@ fun DetailPage(
                             photoUrl = item!!.photoUrl
                         )
 
-                        // Add the item to the cart in CartViewModel
                         cartViewModel.addItemToCart(cartItem)
 
-                        // Navigate to the cart page
-                        navController.navigate("cart")
+                        Toast.makeText(context, "Item ditambahkan ke keranjang", Toast.LENGTH_SHORT).show()
                     } else {
-                        // Redirect to login page if not authenticated
                         navController.navigate("login")
                     }
                 },

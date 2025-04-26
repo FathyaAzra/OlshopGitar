@@ -113,29 +113,31 @@ fun HomePage(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .horizontalScroll(rememberScrollState()), // Make it scrollable horizontally
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-                val allCategories = listOf("All") + categories
-                allCategories.forEach { category ->
-                    val isSelected = selectedCategory == category
-                    Button(
-                        onClick = { selectedCategory = category },
-                        shape = RoundedCornerShape(4.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = if (isSelected) colorScheme.primary else colorScheme.surfaceVariant,
-                            contentColor = if (isSelected) colorScheme.onPrimary else colorScheme.onSurfaceVariant
-                        )
-                    ) {
-                        Text(category, fontSize = 15.sp, style = MaterialTheme.typography.labelMedium)
+            if (categories.isNotEmpty()) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    val allCategories = listOf("All") + categories
+                    allCategories.forEach { category ->
+                        val isSelected = selectedCategory == category
+                        Button(
+                            onClick = { selectedCategory = category },
+                            shape = RoundedCornerShape(4.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = if (isSelected) colorScheme.primary else colorScheme.surfaceVariant,
+                                contentColor = if (isSelected) colorScheme.onPrimary else colorScheme.onSurfaceVariant
+                            )
+                        ) {
+                            Text(category, fontSize = 15.sp, style = MaterialTheme.typography.labelMedium)
+                        }
                     }
                 }
-            }
 
-            Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(16.dp))
+            }
 
             // Display Items in a Grid
             ItemGrid(items = filteredItems) { item ->

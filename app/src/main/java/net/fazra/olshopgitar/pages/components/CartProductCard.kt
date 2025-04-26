@@ -15,7 +15,12 @@ import coil.compose.AsyncImage
 import net.fazra.olshopgitar.data.CartItem
 
 @Composable
-fun CartProductCard(cartItem: CartItem, modifier: Modifier = Modifier, onClick: (() -> Unit)? = null) {
+fun CartProductCard(
+    cartItem: CartItem,
+    modifier: Modifier = Modifier,
+    onRemove: () -> Unit, // Callback to remove item
+    onClick: (() -> Unit)? = null
+) {
     val isOutOfStock = cartItem.quantity == 0
     val colorScheme = MaterialTheme.colorScheme
 
@@ -77,7 +82,7 @@ fun CartProductCard(cartItem: CartItem, modifier: Modifier = Modifier, onClick: 
                 }
             }
 
-            //TODO: Hapus Jenis Item dari Cart
+            // Column for item details and actions
             Column(
                 modifier = Modifier
                     .fillMaxHeight()
@@ -85,30 +90,27 @@ fun CartProductCard(cartItem: CartItem, modifier: Modifier = Modifier, onClick: 
                     .padding(8.dp),
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
+                // Item name
                 Text(
                     text = cartItem.name,
                     style = MaterialTheme.typography.titleSmall,
                     color = if (isOutOfStock) colorScheme.onSurfaceVariant else colorScheme.onSurface,
                     modifier = Modifier.fillMaxWidth()
                 )
-
                 Text(
-                    text = "Rp ${cartItem.price}",
+                    text = "Rp ${formatPrice(cartItem.price)}",
                     style = MaterialTheme.typography.bodyMedium,
                     color = if (isOutOfStock) colorScheme.onSurfaceVariant else colorScheme.onSurface,
                     modifier = Modifier.fillMaxWidth()
                 )
-
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text(
-                        text = "Qty: ${cartItem.quantity}",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = colorScheme.onSurface
-                    )
+                    OutlinedButton(onClick = onRemove) {
+                        Text("Hapus")
+                    }
                 }
             }
         }

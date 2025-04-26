@@ -12,20 +12,20 @@ class ItemRepository {
     private val itemsRef: DatabaseReference = database.getReference("items")
 
     fun fetchCategories(callback: (List<String>) -> Unit) {
-        val database = FirebaseDatabase.getInstance().reference
-        val categoriesRef = database.child("categories")
-
-        categoriesRef.addListenerForSingleValueEvent(object : ValueEventListener {
+        itemsRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                val categories = mutableListOf<String>()
-                snapshot.children.forEach {
-                    val category = it.getValue(String::class.java)
-                    if (category != null) {
+                val categories = mutableSetOf<String>()
+
+                for (itemSnapshot in snapshot.children) {
+                    val category = itemSnapshot.child("category").getValue(String::class.java)
+                    if (!category.isNullOrEmpty()) {
                         categories.add(category)
                     }
                 }
-                callback(categories)
+
+                callback(categories.toList())
             }
+
             override fun onCancelled(error: DatabaseError) {
                 callback(emptyList())
             }

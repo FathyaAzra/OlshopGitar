@@ -30,7 +30,6 @@ fun CartPage(
     authViewModel: AuthViewModel,
     orderViewModel: OrderViewModel
 ) {
-
     val cartItems by cartViewModel.cartItems.observeAsState(emptyMap())
     val currentUser by authViewModel.authState.observeAsState()
     val isAuthenticated = currentUser is AuthState.Authenticated
@@ -43,52 +42,52 @@ fun CartPage(
         }
     }
 
-    // Check if data is loading
-    if (cartItems.isEmpty()) {
-        // Display loading or empty cart state
-        Box(modifier = Modifier.fillMaxSize().padding(16.dp), contentAlignment = Alignment.Center) {
-            if (cartItems.isEmpty()) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(text = "Your cart is empty", style = MaterialTheme.typography.bodyLarge)
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Button(onClick = { navController.navigate("home") }) {
-                        Text("Browse Products")
-                    }
-                }
-            } else {
-                CircularProgressIndicator()
-            }
-        }
-    } else {
-        Column(
-            modifier = modifier
-                .fillMaxSize()
-                .padding(16.dp)
-                .systemBarsPadding()
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(16.dp)
+            .systemBarsPadding()
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(50.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(30.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                IconButton(onClick = { navController.popBackStack() }) {
-                    Icon(Icons.Default.ArrowBack, contentDescription = "Back")
-                }
-                Text(
-                    text = "Keranjang Belanja",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontSize = 28.sp,
-                    color = MaterialTheme.colorScheme.onBackground
-                )
+            IconButton(onClick = { navController.popBackStack() }) {
+                Icon(Icons.Default.ArrowBack, contentDescription = "Back")
             }
+            Text(
+                text = "Keranjang Belanja",
+                style = MaterialTheme.typography.titleLarge,
+                fontSize = 28.sp,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+        }
+        Spacer(modifier = Modifier.height(16.dp))
 
-            Spacer(modifier = Modifier.height(16.dp))
-
+        if (cartItems.isEmpty()) {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(text = "Your cart is empty", style = MaterialTheme.typography.bodyLarge)
+                Spacer(modifier = Modifier.height(16.dp))
+                Button(onClick = { navController.navigate("home") }) {
+                    Text("Browse Products")
+                }
+            }
+        } else {
             LazyColumn(contentPadding = PaddingValues(vertical = 8.dp)) {
                 items(cartItems.values.toList()) { item ->
-                    CartProductCard(cartItem = item)
+                    CartProductCard(
+                        cartItem = item,
+                        onRemove = {
+                            cartViewModel.removeItemFromCart(item.itemId)
+                        }
+                    )
                 }
             }
 
@@ -123,5 +122,4 @@ fun CartPage(
         }
     }
 }
-
 

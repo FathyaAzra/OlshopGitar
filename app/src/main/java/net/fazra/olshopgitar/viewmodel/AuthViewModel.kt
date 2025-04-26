@@ -13,15 +13,22 @@ class AuthViewModel : ViewModel() {
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
     private val database = FirebaseDatabase.getInstance().reference
     private val userRef = database.child("users")
+
     private val _authState = MutableLiveData<AuthState>()
     val authState: LiveData<AuthState> = _authState
+
+    private val _userEmail = MutableLiveData<String>()
+    val userEmail: LiveData<String> = _userEmail
 
     init {
         auth.addAuthStateListener { firebaseAuth ->
             val currentUser = firebaseAuth.currentUser
-            _authState.value = currentUser?.let {
-                AuthState.Authenticated(it.uid)
-            } ?: AuthState.Unauthenticated
+            if (currentUser != null) {
+                _authState.value = AuthState.Authenticated(currentUser.uid)
+                _userEmail.value = currentUser.email
+            } else {
+                _authState.value = AuthState.Unauthenticated
+            }
         }
     }
 
@@ -37,6 +44,7 @@ class AuthViewModel : ViewModel() {
                 if (task.isSuccessful) {
                     val user = auth.currentUser
                     if (user != null) {
+                        _userEmail.value = user.email
                         checkIfUserExists(user)
                     }
                 } else {
@@ -57,6 +65,7 @@ class AuthViewModel : ViewModel() {
                 if (task.isSuccessful) {
                     val user = auth.currentUser
                     if (user != null) {
+                        _userEmail.value = user.email
                         saveUserData(user)
                     }
                 } else {
@@ -71,6 +80,7 @@ class AuthViewModel : ViewModel() {
                 saveUserData(user)
             } else {
                 _authState.value = AuthState.Authenticated(user.uid)
+                _userEmail.value = user.email
             }
         }
     }
@@ -78,6 +88,7 @@ class AuthViewModel : ViewModel() {
     private fun saveUserData(user: FirebaseUser) {
         val userId = user.uid
         val email = user.email ?: "Unknown"
+        _userEmail.value = email
 
         val newUser = User(
             userId = userId,
@@ -101,8 +112,8 @@ class AuthViewModel : ViewModel() {
     fun signout() {
         auth.signOut()
         _authState.value = AuthState.Unauthenticated
+        _userEmail.value = ""
     }
-
 }
 
 sealed class AuthState {

@@ -80,7 +80,7 @@ fun ItemCard(item: Item, modifier: Modifier = Modifier, onClick: (() -> Unit)? =
             } else {
                 Text(
                     text = item.name,
-                    style = MaterialTheme.typography.titleSmall,
+                    style = MaterialTheme.typography.bodyLarge,
                     color = if (isOutOfStock) colorScheme.onSurfaceVariant else colorScheme.onSurface,
                     modifier = Modifier
                         .padding(horizontal = 8.dp)
@@ -90,7 +90,7 @@ fun ItemCard(item: Item, modifier: Modifier = Modifier, onClick: (() -> Unit)? =
 
 
             Text(
-                text = "Rp ${item.price}",
+                text = "Rp ${formatPrice(item.price)}",
                 style = MaterialTheme.typography.bodyMedium,
                 color = if (isOutOfStock) colorScheme.onSurfaceVariant else colorScheme.onSurface,
                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)

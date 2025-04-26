@@ -66,6 +66,29 @@ class CartViewModel : ViewModel() {
         }
     }
 
+    fun updateItemQuantity(itemId: String, newQuantity: Int) {
+        val userId = FirebaseAuth.getInstance().currentUser?.uid
+        if (!userId.isNullOrEmpty()) {
+            getUserData(userId) { user ->
+                user?.let {
+                    val updatedItems = it.cart.items.toMutableMap()
+                    val existingItem = updatedItems[itemId]
+
+                    if (existingItem != null) {
+                        // Update the quantity of the existing item
+                        existingItem.quantity = newQuantity
+                        updatedItems[itemId] = existingItem
+
+                        val updatedCart = it.cart.copy(items = updatedItems)
+                        updateCart(userId, updatedCart)
+                        _cartItems.value = updatedItems
+                    }
+                }
+            }
+        }
+    }
+
+
     fun removeItemFromCart(itemId: String) {
         val userId = FirebaseAuth.getInstance().currentUser?.uid
         if (!userId.isNullOrEmpty()) {
@@ -101,3 +124,4 @@ class CartViewModel : ViewModel() {
         }
     }
 }
+

@@ -5,11 +5,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.Text
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
@@ -19,8 +19,8 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import net.fazra.olshopgitar.viewmodel.AuthViewModel
 import net.fazra.olshopgitar.viewmodel.OrderViewModel
-import net.fazra.olshopgitar.data.Order
 import net.fazra.olshopgitar.viewmodel.AuthState
+import net.fazra.olshopgitar.pages.components.OrderItemCard
 
 @Composable
 fun HistoryPage(
@@ -41,69 +41,54 @@ fun HistoryPage(
         }
     }
 
-    if (isLoading) {
-        Box(modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-            contentAlignment = Alignment.Center
+    Column(modifier = modifier.fillMaxSize().padding(16.dp)) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(30.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            CircularProgressIndicator()
-        }
-    } else {
-        // Show orders once loading is complete
-        Column(modifier = modifier.fillMaxSize().padding(16.dp)) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(30.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                IconButton(onClick = { navController.popBackStack() }) {
-                    Icon(Icons.Default.ArrowBack, contentDescription = "Back")
-                }
-                Text(
-                    text = "Riwayat Belanja",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontSize = 28.sp,
-                    color = MaterialTheme.colorScheme.onBackground
-                )
+            IconButton(onClick = { navController.popBackStack() }) {
+                Icon(Icons.Default.ArrowBack, contentDescription = "Back")
             }
-            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "Riwayat Belanja",
+                style = MaterialTheme.typography.titleLarge,
+                fontSize = 28.sp,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+        }
+        Spacer(modifier = Modifier.height(16.dp))
 
+        if (isLoading) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
+        } else {
             if (orders.isEmpty()) {
                 Text(
                     text = "No orders found.",
                     modifier = Modifier.fillMaxWidth(),
-                    style = MaterialTheme.typography.bodyMedium
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onTertiary
                 )
             } else {
                 LazyColumn(
-                    contentPadding = PaddingValues(vertical = 8.dp)
+                    contentPadding = PaddingValues(vertical = 8.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     itemsIndexed(orders) { index, order ->
-                        OrderItemView(order = order, index = index)
+                        OrderItemCard(order = order, index = index)
                     }
                 }
             }
         }
-    }
-}
-
-@Composable
-fun OrderItemView(order: Order, index: Int) {
-    Column(modifier = Modifier.padding(vertical = 4.dp)) {
-        Text(text = "${index + 1}. Order ID: ${order.orderId}", style = MaterialTheme.typography.bodyLarge)
-        Text(text = "Date: ${order.orderDate}", style = MaterialTheme.typography.bodyMedium)
-
-        order.items.values.forEach { item ->
-            Text(text = "- ${item.name}  x${item.quantity} • Rp ${item.price}", style = MaterialTheme.typography.bodySmall)
-        }
-
-        // Display the total price of the order
-        Text(text = "Total: Rp ${order.totalPrice}", style = MaterialTheme.typography.bodyMedium)
-
-        Spacer(modifier = Modifier.height(8.dp))
     }
 }
 
